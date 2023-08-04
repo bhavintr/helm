@@ -1,0 +1,115 @@
+apiVersion: v1
+entries:
+  cfs:
+  - apiVersion: v2
+    appVersion: 3.16.1-ltsc2019
+    created: "2023-08-04T15:42:31.96204331Z"
+    description: A Helm chart for CFS Kubernetes Deployment
+    digest: f13404f8fe5a25552ae980e61ba21e859dc72618b7918a940bcb7394546b8000
+    name: cfs
+    type: application
+    urls:
+    - https://github.com/bhavintr/helm/releases/download/cfs-0.1.0/cfs-0.1.0.tgz
+    version: 0.1.0
+  common-services:
+  - apiVersion: v2
+    appVersion: "1.2"
+    created: "2023-08-04T15:42:32.226763648Z"
+    dependencies:
+    - condition: argo-cd.enabled
+      name: argo-cd
+      repository: https://argoproj.github.io/argo-helm
+      version: 5.6.0
+    - condition: prometheus.enabled
+      name: prometheus
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 15.13.0
+    - condition: grafana.enabled
+      name: grafana
+      repository: https://grafana.github.io/helm-charts
+      version: 6.40.0
+    - condition: elasticsearch.enabled
+      name: elasticsearch
+      repository: https://helm.elastic.co
+      version: 7.17.3
+    - condition: kibana.enabled
+      name: kibana
+      repository: https://helm.elastic.co
+      version: 7.17.3
+    - condition: haproxy.enabled
+      name: haproxy
+      repository: https://haproxytech.github.io/helm-charts
+      version: 1.17.3
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: https://charts.bitnami.com/bitnami
+      version: 12.1.3
+    - condition: zookeeper.enabled
+      name: zookeeper
+      repository: https://charts.bitnami.com/bitnami
+      version: 11.0.0
+    - condition: pgadmin4.enabled
+      name: pgadmin4
+      repository: https://helm.runix.net
+      version: 1.13.8
+    - condition: opensearch.enabled
+      name: opensearch
+      repository: https://opensearch-project.github.io/helm-charts
+      version: 2.11.1
+    - condition: opensearch-dashboards.enabled
+      name: opensearch-dashboards
+      repository: https://opensearch-project.github.io/helm-charts
+      version: 2.9.0
+    - condition: fluent-bit.enabled
+      name: fluent-bit
+      repository: https://fluent.github.io/helm-charts
+      version: 0.24.0
+    description: A Helm chart for RadiantOne Common Services on Kubernetes
+    digest: 413c4b87f26e83f14e895ab3c53ae4ec84ce46785fdd2eafaf6a425f02bdbba9
+    maintainers:
+    - email: pgodey@radiantlogic.com
+      name: pgodey
+      url: https://www.radiantlogic.com
+    name: common-services
+    type: application
+    urls:
+    - https://github.com/bhavintr/helm/releases/download/common-services-1.0.5/common-services-1.0.5.tgz
+    version: 1.0.5
+  fid:
+  - apiVersion: v2
+    appVersion: 8.0.0
+    created: "2023-08-04T15:42:32.404175106Z"
+    dependencies:
+    - alias: zookeeper
+      condition: dependencies.zookeeper.enabled
+      name: zookeeper
+      repository: https://radiantlogic-devops.github.io/helm
+      version: 0.1.4
+    description: A Helm chart for FID Kubernetes deployment
+    digest: f39e3ea068b27c042e3fedf81eadf9bc3af77a8a1bdada77621533c0defeb25d
+    home: https://radiantlogic-devops.github.io/helm
+    maintainers:
+    - email: pgodey@radiantlogic.com
+      name: pgodey
+      url: https://www.radiantlogic.com
+    name: fid
+    type: application
+    urls:
+    - https://github.com/bhavintr/helm/releases/download/fid-1.0.0/fid-1.0.0.tgz
+    version: 1.0.0
+  zookeeper:
+  - apiVersion: v2
+    appVersion: 3.5.8
+    created: "2023-08-04T15:42:32.537122Z"
+    description: A Helm chart for Zookeeper deployment on Kubernetes
+    digest: 73c20df62f16973fa230873b21c4f4638e129afae060ccb877d3e5e61397a112
+    maintainers:
+    - email: pgodey@radiantlogic.com
+      name: pgodey
+      url: https://www.radiantlogic.com
+    name: zookeeper
+    type: application
+    urls:
+    - https://github.com/bhavintr/helm/releases/download/zookeeper-0.1.5/zookeeper-0.1.5.tgz
+    version: 0.1.5
+generated: "2023-08-04T15:42:32.5371298Z"
