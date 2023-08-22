@@ -18,6 +18,7 @@ spec:
       name: {{ include "fid.fullname" . }}-post-install-job
     spec:
       serviceAccountName: {{ include "fid.fullname" . }}-hook-account
+      activeDeadlineSeconds: 900
       restartPolicy: Never
       containers:
       - name: post-upgrade-job

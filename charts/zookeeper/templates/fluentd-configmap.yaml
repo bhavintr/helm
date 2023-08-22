@@ -28,11 +28,13 @@ data:
         hostname ${hostname}
         </record>
     </filter>
-    <match zookeeper.log>
-        @type {{ .Values.metrics.fluentd.elasticSearchType }}
-        host ELASTICSEARCH_HOST
-        port ELASTICSEARCH_PORT
-        logstash_format true
-        logstash_prefix zookeeper.log
+    <match vds_server_access.log>
+      @type datadog
+      @id awesome_agent
+      api_key DD_API_KEY
+      use_json true
+      dd_source "a205150-isrm-iam-vds-zk"
+      use_ssl true
+      service "a205150-isrm-iam-vds-zk"
     </match>
 {{- end }}

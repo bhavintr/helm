@@ -1,0 +1,53 @@
+{{- if and (.Release.IsUpgrade) (.Values.hooks.post_upgrade.enabled) }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "zookeeper.fullname" . }}-post-upgrade-job
+  labels:
+    {{- include "zookeeper.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": "post-upgrade"
+    "helm.sh/hook-weight": "1"
+spec:
+  template:
+    metadata:
+      name: {{ include "zookeeper.fullname" . }}-post-upgrade-job
+      annotations:
+        proxy.istio.io/config: '{ "holdApplicationUntilProxyStarts": true }'
+    spec:
+      restartPolicy: Never
+      serviceAccountName: default
+      containers:
+        - name: post-upgrade-job
+          image: mctbhavin/isrmiamvds-tool:v6
+          imagePullPolicy: Always
+          env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: aws-credentials
+                  key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: aws-credentials
+                  key: AWS_SECRET_ACCESS_KEY
+            - name: AWS_SESSION_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: aws-credentials
+                  key: AWS_SESSION_TOKEN
+          command: ["sh", "-c"]
+          args:
+          - |
+            set -ex
+
+            echo "Starting post-upgrade hook"
+              set -ex
+              sleep 30
+              aws s3 cp s3://a205150-s3-radiantone-us-east-1-nonprod-infra/artifacts/Scripts/restart-zk.sh /opt/radiantone/restart-zk.sh
+              chmod +x /opt/radiantone/restart-zk.sh
+              ~/restart-zk.sh
+              curl --max-time 2 -s -f -XPOST http://127.0.0.1:15000/quitquitquit
+      terminationGracePeriodSeconds: 5              
+{{- end }}

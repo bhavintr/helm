@@ -6,7 +6,7 @@ image:
   repository: radiantone/fid
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  tag: "7.3.29"
 fid:
   ## FID root user name
   ## Default values cn=Directory Manager
@@ -16,7 +16,7 @@ fid:
   rootPassword: "Welcome1234"
   ## License for FID
   ##
-  license: "[FID Cluster License]"
+  license: "{rlib}x9TJ257Q3K3l0NeRyNrF3KHi3Lvc2tjRxMbZ3cbg53rS1taPwtPTzdbR6InhmNzcwMTX38ThoMDo186guNbQ1Y3T7LzY2crXu9DSppKeo32llpuThJKQ0sWrpI2fqZmXhY6WmZGeoXyfmKCQlKKYro6ypo6gm5mTgpGUmZSfoK/hzMrXu9DSvcrb2b/jyNbTj5KanJGjqYWlmJqZiJmQ1sLmwrvTzNyghQ=="
   ## Detach from cluster on termination
   ##
   detach: false
@@ -57,7 +57,7 @@ zk:
   userName: "admin"
   password: "secret1234"
 sysctl:
-  enabled: false
+  enabled: true
 imagePullSecrets: []
 # imagePullSecrets:
 # - name: regcred
@@ -71,16 +71,17 @@ serviceAccount:
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
   name: ""
-podAnnotations: {}
+podAnnotations:
+  proxy.istio.io/config: '{ "holdApplicationUntilProxyStarts": true }'
 podSecurityContext:
   fsGroup: 1000
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
+securityContext:
+   capabilities:
+     drop:
+     - ALL
+   readOnlyRootFilesystem: true
+   runAsNonRoot: true
+   runAsUser: 1000
 service:
   type: ClusterIP
   port: 7070
@@ -136,7 +137,7 @@ affinity: {}
 ## ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
 ##
 persistence:
-  enabled: false
+  enabled: true
   ## If defined, storageClassName: <storageClass>
   ## If set to "-", storageClassName: "", which disables dynamic provisioning
   ## If undefined (the default) or set to null, no storageClassName spec is
@@ -144,7 +145,7 @@ persistence:
   ##   Azure, standard on GKE, AWS & OpenStack)
   ##
   # storageClass: "-"
-  storageClass: "default"
+  storageClass: "local-path"
   accessModes:
   - ReadWriteOnce
   size: 10Gi
@@ -152,7 +153,7 @@ persistence:
 ## Under development
 ##
 metrics:
-  enabled: false
+  enabled: true
   image: radiantone/fid-exporter
   imageTag: latest
   annotations: {}

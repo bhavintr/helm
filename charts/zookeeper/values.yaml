@@ -10,7 +10,14 @@ image:
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
 
+initContainers:
+  name: aws-cp
+  image: mctbhavin/isrmiamvds-tool:test
+  tag: ""
+#  imagePullSecrets:
+#    - name: regcred
 imagePullSecrets: []
+
 nameOverride: ""
 fullnameOverride: ""
 
@@ -19,6 +26,8 @@ zk:
   ensemblePort: 2888
   leaderRelectionPort: 3888
   adminPort: 8080
+  updateStrategy: OnDelete
+  rollingUpdatePartition: 0
 
 serviceAccount:
   # Specifies whether a service account should be created
@@ -29,18 +38,22 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template
   name: ""
 
-podAnnotations: {}
+podAnnotations:
+  traffic.sidecar.istio.io/excludeOutboundPorts: 443,3888,2888
+  traffic.sidecar.istio.io/excludeInboundPorts: 3888,2888
+  proxy.istio.io/config: '{ "holdApplicationUntilProxyStarts": true }'
 
 podSecurityContext: {}
-  # fsGroup: 2000
 
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
+securityContext:
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsGroup: 1000
+  runAsUser: 1000
+  allowPrivilegeEscalation: false
 
 service:
   type: ClusterIP
@@ -49,33 +62,18 @@ service:
 ingress:
   enabled: false
   annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
   hosts:
     - host: chart-example.local
       paths: []
   tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
 
 resources:
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
   limits:
     cpu: 1
     memory: 1Gi
   requests:
     cpu: 500m
-    memory: 512Mi
+    memory: 515Mi
 
 nodeSelector: {}
 
@@ -83,27 +81,16 @@ tolerations: []
 
 affinity: {}
 
-## Enable persistence using Persistent Volume Claims
-## ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
-##
 persistence:
-  enabled: false
-  ## If defined, storageClassName: <storageClass>
-  ## If set to "-", storageClassName: "", which disables dynamic provisioning
-  ## If undefined (the default) or set to null, no storageClassName spec is
-  ##   set, choosing the default provisioner.  (gp2 on AWS, azure-disk on
-  ##   Azure, standard on GKE, AWS & OpenStack)
-  ##
-  # storageClass: "-"
-  storageClass: "default"
+  enabled: true
+  storageClass: "local-path"
   accessModes:
   - ReadWriteOnce
   size: 10Gi
   annotations: {}
 
-
 metrics:
-  enabled: false
+  enabled: true
   image: radiantone/zk-exporter
   imageTag: latest
   annotations: {}
@@ -116,8 +103,12 @@ metrics:
     elasticSearchHost: elasticsearch-master
     elasticSearchType: elasticsearch
   livenessProbe:
-    initialDelaySeconds: 60
+    initialDelaySeconds: 30
     timeoutSeconds: 5
   readinessProbe:
-    initialDelaySeconds: 120
+    initialDelaySeconds: 180
     timeoutSeconds: 5
+
+hooks:
+  post_upgrade:
+    enabled: false

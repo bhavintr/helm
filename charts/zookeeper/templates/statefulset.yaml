@@ -7,6 +7,16 @@ metadata:
 spec:
   replicas: {{ .Values.replicaCount }}
   serviceName: {{ include "zookeeper.fullname" . }}
+  updateStrategy:
+    type: {{ .Values.zk.updateStrategy }}
+    {{- if (eq "OnDelete" .Values.zk.updateStrategy) }}
+    rollingUpdate: null
+    {{- else }}
+    {{- if .Values.zk.rollingUpdatePartition }}
+    rollingUpdate:
+      partition: {{ .Values.zk.rollingUpdatePartition }}
+    {{- end }}
+    {{- end }}  
   selector:
     matchLabels:
       {{- include "zookeeper.selectorLabels" . | nindent 6 }}
@@ -26,6 +36,46 @@ spec:
       serviceAccountName: {{ include "zookeeper.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+      - name: {{ .Values.initContainers.name }}
+        image: {{ .Values.initContainers.image }} # <---- update from variable
+        imagePullPolicy: Always
+        env:
+          - name: AWS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: aws-credentials
+                key: AWS_ACCESS_KEY_ID
+          - name: AWS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: aws-credentials
+                key: AWS_SECRET_ACCESS_KEY
+          - name: AWS_SESSION_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: aws-credentials
+                key: AWS_SESSION_TOKEN             
+        command: ["/bin/sh", "-c"]
+        args: 
+          - |
+            set -ex
+            # copy Script folder for /opt/radiantoe/scripts
+            aws s3 cp s3://a205150-s3-radiantone-us-east-1-nonprod-infra/artifacts/Scripts/ /opt/radiantone/scripts --recursive
+            chmod +754 /opt/radiantone/scripts/pull_metrics.sh
+            chmod +754 /opt/radiantone/scripts/pull_vds_metrics.sh
+        securityContext:
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 10001
+          runAsGroup: 10001
+          allowPrivilegeEscalation: false              
+        volumeMounts:
+          - name: scripts
+            mountPath: /opt/radiantone/scripts         
       containers:
       - name: {{ .Chart.Name }}
         securityContext:
@@ -144,6 +194,9 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      volumes:
+        - name: scripts
+          emptyDir: {}
 {{- if .Values.persistence.enabled }}
   volumeClaimTemplates:
   - metadata:
